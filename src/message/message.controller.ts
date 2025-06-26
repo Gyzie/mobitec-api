@@ -1,17 +1,38 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { CreateMessageDto } from './create-message.dto';
 import { MessageService } from './message.service';
 import nodeCron from 'node-cron';
+import { Message } from './message.entity';
 
 @Controller('message')
 export class MessageController {
   constructor(private messageService: MessageService) {}
 
+  @Get()
+  listMessages(): Promise<Message[]> {
+    return this.messageService.listQueuedMessages();
+  }
+
+  @Delete('/:id')
+  deleteMessage(@Param('id') id: number): Promise<void> {
+    return this.messageService.deleteQueuedMessage(id);
+  }
+
   @Post()
-  createMessage(@Body() createMessageDto: CreateMessageDto): CreateMessageDto {
+  async createMessage(
+    @Body() createMessageDto: CreateMessageDto,
+  ): Promise<CreateMessageDto> {
     // Validate createAt
-    const createAtAsDate = new Date(createMessageDto.executeAt);
-    if (createAtAsDate.toString() !== 'Invalid Date') {
+    if (this.messageService.isDate(createMessageDto.executeAt)) {
+      const createAtAsDate = new Date(createMessageDto.executeAt);
       if (createAtAsDate.getTime() < new Date().getTime()) {
         throw new BadRequestException('executeAt cannot be in the past');
       }
@@ -53,7 +74,7 @@ export class MessageController {
       return { delayMs: frame.delayMs, pixels: frame.pixels };
     });
 
-    this.messageService.processMessage(createMessageDto);
+    await this.messageService.processMessage(createMessageDto);
     return createMessageDto;
   }
 }
