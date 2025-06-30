@@ -1,5 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptions } from '@nestjs/swagger';
 import {
   ArrayNotEmpty,
   IsArray,
@@ -16,6 +15,35 @@ export class MessageFrame {
   pixels: PixelState[][];
 }
 
+export const MessageFramesApiProperty: ApiPropertyOptions = {
+  type: 'array',
+  items: {
+    type: 'object',
+    properties: {
+      delayMs: {
+        type: 'number',
+        example: 100,
+      },
+      pixels: {
+        type: 'array',
+        items: {
+          type: 'array',
+          items: {
+            type: 'number',
+          },
+        },
+        example: [
+          [0, 0, 0, 1, 0, 0],
+          [0, 1, 0, 0, 1, 0],
+          [0, 0, 0, 0, 1, 0],
+          [0, 1, 0, 0, 1, 0],
+          [0, 0, 0, 1, 0, 0],
+        ],
+      },
+    },
+  },
+};
+
 @Entity()
 export class Message {
   @ApiProperty()
@@ -29,34 +57,7 @@ export class Message {
   @Column({ type: 'varchar', length: 255 })
   executeAt: string | Date;
 
-  @ApiProperty({
-    type: 'array',
-    items: {
-      type: 'object',
-      properties: {
-        delayMs: {
-          type: 'number',
-          example: 100,
-        },
-        pixels: {
-          type: 'array',
-          items: {
-            type: 'array',
-            items: {
-              type: 'number',
-            },
-          },
-          example: [
-            [0, 0, 0, 1, 0, 0],
-            [0, 1, 0, 0, 1, 0],
-            [0, 0, 0, 0, 1, 0],
-            [0, 1, 0, 0, 1, 0],
-            [0, 0, 0, 1, 0, 0],
-          ],
-        },
-      },
-    },
-  })
+  @ApiProperty(MessageFramesApiProperty)
   @IsArray()
   @ArrayNotEmpty()
   @Column({ type: 'json' })

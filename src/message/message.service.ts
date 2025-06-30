@@ -21,6 +21,60 @@ export class MessageService {
     this.initSendPlannedTasksLoop();
   }
 
+  /**
+   * @throws RequestException if frames is invalid
+   */
+  public parseDtoExecuteAt(executeAt: Date | string): Date | string {
+    // Validate createAt
+    if (this.isDate(executeAt)) {
+      const createAtAsDate = new Date(executeAt);
+      if (createAtAsDate.getTime() < new Date().getTime()) {
+        throw new BadRequestException('executeAt cannot be in the past');
+      }
+      return createAtAsDate;
+    } else if (
+      typeof executeAt !== 'string' ||
+      (executeAt !== 'now' && !nodeCron.validate(executeAt))
+    ) {
+      throw new BadRequestException(
+        "executeAt must be a date, 'now' or a cron string",
+      );
+    }
+    return executeAt;
+  }
+
+  /**
+   * @throws RequestException if frames is invalid
+   */
+  public parseDtoFrames(frames: MessageFrame[]): MessageFrame[] {
+    // Validate frames object
+    return frames.map((frame, index) => {
+      if (
+        typeof frame.delayMs !== 'number' ||
+        frame.delayMs < 0 ||
+        !Number.isInteger(frame.delayMs)
+      ) {
+        throw new BadRequestException(
+          `Frame at index ${index} as an invalid delayMs: Must be a positive integer.`,
+        );
+      }
+
+      if (
+        !Array.isArray(frame.pixels) ||
+        frame.pixels.some(
+          (row) =>
+            !Array.isArray(row) || row.some((pixel) => ![0, 1].includes(pixel)),
+        )
+      ) {
+        throw new BadRequestException(
+          `Frame at index ${index} as an invalid pixels: Must be (1,0)[][].`,
+        );
+      }
+
+      return { delayMs: frame.delayMs, pixels: frame.pixels };
+    });
+  }
+
   public subscribe(callback: MessageListener) {
     this.listeners.push(callback);
   }
