@@ -2,8 +2,11 @@ import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { CreateMessageDto } from './create-message.dto';
 import { MessageService } from './message.service';
 import { Message } from './message.entity';
+import { AUTH_KEY_HEADER } from 'src/guards/auth.guard';
+import { ApiSecurity } from '@nestjs/swagger';
 
 @Controller('message')
+@ApiSecurity('api_key', [AUTH_KEY_HEADER])
 export class MessageController {
   constructor(private messageService: MessageService) {}
 
