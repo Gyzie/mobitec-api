@@ -11,8 +11,11 @@ import { CreateConceptDto } from './create-concept.dto';
 import { ConceptService } from './concept.service';
 import { Concept } from './concept.entity';
 import { MessageService } from 'src/message/message.service';
+import { ApiSecurity } from '@nestjs/swagger';
+import { AUTH_KEY_HEADER } from 'src/guards/auth.guard';
 
 @Controller('concept')
+@ApiSecurity('api_key', [AUTH_KEY_HEADER])
 export class ConceptController {
   constructor(
     private conceptService: ConceptService,
