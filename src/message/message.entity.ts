@@ -51,7 +51,11 @@ export class Message {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ApiProperty({ example: 'now' })
+  @ApiProperty({
+    description:
+      'When to execute the message. Can be `now`, a string containing a cron schedule expression (`5 4 * * sun`) or any date string that is parsable by `new Date()`',
+    example: 'now',
+  })
   @IsString()
   @MaxLength(255)
   @Column({ type: 'varchar', length: 255 })
