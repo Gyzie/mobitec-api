@@ -2,16 +2,16 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
 
-const apiKey = process.env.API_KEY;
+const apiKeys = (process.env.API_KEY || '').split(' ').filter((key) => !!key);
 
-if (!apiKey) {
+if (apiKeys.length === 0) {
   throw new Error('Missing API_KEY in env');
 }
 
 export const AUTH_KEY_HEADER = 'auth-key';
 
 export const isValidAuthKey = (key: string): boolean => {
-  return key === apiKey;
+  return apiKeys.includes(key);
 };
 
 @Injectable()
