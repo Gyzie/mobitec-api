@@ -6,7 +6,7 @@ import { CreateConcept1751294686080 } from './migrations/1751294686080-create-co
 
 export const typeOrmConfig: DataSourceOptions = {
   type: 'sqlite',
-  database: 'database.sqlite',
+  database: 'data/database.sqlite',
   logging: true,
   entities: [Message, Concept],
   migrations: [CreateMessage1750931262909, CreateConcept1751294686080],
